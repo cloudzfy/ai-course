@@ -20,6 +20,10 @@ int main(int argc, const char * argv[]) {
             cin>>map[i][j];
         }
     }
+    if(task_no == 1)
+    {
+        
+    }
     fclose(in);
     fclose(out);
     return 0;
