@@ -28,7 +28,6 @@ struct Point
 {
     int x;
     int y;
-    Point* parent;
     int value;
     int depth;
     Point* child;
@@ -43,82 +42,217 @@ struct Log
 
 queue<Log> history;
 
-int legal(int x, int y)
+void init(int rec[][8])
 {
-    int a, b;
-    a = 0; b = 0;
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            rec[i][j] = 3;
+        }
+    }
+}
+
+int legal(int x, int y, int rec[][8])
+{
+    int a, b, c = FALSE;
+    a = FALSE; b = FALSE;
     // X+ Direction
     for (int i = x + 1; i < 8; i++)
     {
-        if(map[i][y] == ply && a == 1) b = 1;
-        if(map[i][y] == (ply + 1) % 2) a = 1;
+        if(map[i][y] == ply && a == TRUE) b = TRUE;
+        if(map[i][y] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == 1) return TRUE;
-    a = 0; b = 0;
+    if(b == TRUE)
+    {
+        if(!c) init(rec);
+        for (int i = x + 1; i < 8; i++)
+        {
+            if(map[i][y] == (ply + 1) % 2)
+            {
+                rec[i][y] = map[i][y];
+                map[i][y] = ply;
+            }
+            else break;
+        }
+        c = TRUE;
+    }
+    a = FALSE; b = FALSE;
     // X- Direction
     for (int i = x - 1; i >= 0; i--)
     {
-        if(map[i][y] == ply && a == 1) b = 1;
-        if(map[i][y] == (ply + 1) % 2) a = 1;
+        if(map[i][y] == ply && a == TRUE) b = TRUE;
+        if(map[i][y] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == 1) return TRUE;
-    a = 0; b = 0;
+    if(b == TRUE)
+    {
+        if(!c) init(rec);
+        for (int i = x - 1; i >= 0; i--)
+        {
+            if(map[i][y] == (ply + 1) % 2)
+            {
+                rec[i][y] = map[i][y];
+                map[i][y] = ply;
+            }
+            else break;
+        }
+        c = TRUE;
+    }
+    a = FALSE; b = FALSE;
     // Y+ Direction
     for (int j = y + 1; j < 8; j++)
     {
-        if(map[x][j] == ply && a == 1) b = 1;
-        if(map[x][j] == (ply + 1) % 2) a = 1;
+        if(map[x][j] == ply && a == TRUE) b = TRUE;
+        if(map[x][j] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == 1) return TRUE;
-    a = 0; b = 0;
+    if(b == TRUE)
+    {
+        if(!c) init(rec);
+        for (int j = y + 1; j < 8; j++)
+        {
+            if(map[x][j] == (ply + 1) % 2)
+            {
+                rec[x][j] = map[x][j];
+                map[x][j] = ply;
+            }
+            else break;
+        }
+        c = TRUE;
+    }
+    a = FALSE; b = FALSE;
     // Y- Direction
     for (int j = y - 1; j >= 0; j--)
     {
-        if(map[x][j] == ply && a == 1) b = 1;
-        if(map[x][j] == (ply + 1) % 2) a = 1;
+        if(map[x][j] == ply && a == TRUE) b = TRUE;
+        if(map[x][j] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == 1) return TRUE;
-    a = 0; b = 0;
+    if(b == TRUE)
+    {
+        if(!c) init(rec);
+        for (int j = y - 1; j >= 0; j--)
+        {
+            if(map[x][j] == (ply + 1) % 2)
+            {
+                rec[x][j] = map[x][j];
+                map[x][j] = ply;
+            }
+            else break;
+        }
+        c = TRUE;
+    }
+    a = FALSE; b = FALSE;
     // X+Y+ Direction
     for (int i = x + 1, j = y + 1; i < 8 && j < 8; i++, j++)
     {
-        if(map[i][j] == ply && a == 1) b = 1;
-        if(map[i][j] == (ply + 1) % 2) a = 1;
+        if(map[i][j] == ply && a == TRUE) b = TRUE;
+        if(map[i][j] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == 1) return TRUE;
-    a = 0; b = 0;
+    if(b == TRUE)
+    {
+        if(!c) init(rec);
+        for (int i = x + 1, j = y + 1; i < 8 && j < 8; i++, j++)
+        {
+            if(map[i][j] == (ply + 1) % 2)
+            {
+                rec[i][j] = map[i][j];
+                map[i][j] = ply;
+            }
+            else break;
+        }
+        c = TRUE;
+    }
+    a = FALSE; b = FALSE;
     // X-Y- Direction
     for (int i = x - 1, j = y - 1; i >= 0 && j >= 0; i--, j--)
     {
-        if(map[i][j] == ply && a == 1) b = 1;
-        if(map[i][j] == (ply + 1) % 2) a = 1;
+        if(map[i][j] == ply && a == TRUE) b = TRUE;
+        if(map[i][j] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == 1) return TRUE;
-    a = 0; b = 0;
+    if(b == TRUE)
+    {
+        if(!c) init(rec);
+        for (int i = x - 1, j = y - 1; i >= 0 && j >= 0; i--, j--)
+        {
+            if(map[i][j] == (ply + 1) % 2)
+            {
+                rec[i][j] = map[i][j];
+                map[i][j] = ply;
+            }
+            else break;
+        }
+        c = TRUE;
+    }
+    a = FALSE; b = FALSE;
     // X+Y- Direction
     for (int i = x + 1, j = y - 1; i < 8 && j >= 0; i++, j--)
     {
-        if(map[i][j] == ply && a == 1) b = 1;
-        if(map[i][j] == (ply + 1) % 2) a = 1;
+        if(map[i][j] == ply && a == TRUE) b = TRUE;
+        if(map[i][j] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == 1) return TRUE;
-    a = 0; b = 0;
+    if(b == TRUE)
+    {
+        if(!c) init(rec);
+        for (int i = x + 1, j = y - 1; i < 8 && j >= 0; i++, j--)
+        {
+            if(map[i][j] == ply && a == TRUE)
+            {
+                rec[i][j] = map[i][j];
+                map[i][j] = ply;
+            }
+            else break;
+        }
+        c = TRUE;
+    }
+    a = FALSE; b = FALSE;
     // X-Y+ Direction
     for (int i = x - 1, j = y + 1; i >= 0 && j < 8; i--, j++)
     {
-        if(map[i][j] == ply && a == 1) b = 1;
-        if(map[i][j] == (ply + 1) % 2) a = 1;
+        if(map[i][j] == ply && a == TRUE) b = TRUE;
+        if(map[i][j] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == 1) return TRUE;
+    if(b == TRUE)
+    {
+        if(!c) init(rec);
+        for (int i = x - 1, j = y + 1; i >= 0 && j < 8; i--, j++)
+        {
+            if(map[i][j] == (ply + 1) % 2)
+            {
+                rec[i][j] = map[i][j];
+                map[i][j] = ply;
+            }
+            else break;
+        }
+        c = TRUE;
+    }
+    if(c)
+    {
+        rec[x][y] = map[x][y];
+        map[x][y] = ply;
+        return TRUE;
+    }
     return FALSE;
+}
+
+void backup(int rec[][8])
+{
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if (rec[i][j] != 3)
+            {
+                map[i][j] = rec[i][j];
+            }
+        }
+    }
 }
 
 int val()
@@ -132,7 +266,7 @@ int val()
             {
                 val += eval[i][j];
             }
-            else
+            else if(map[i][j] != 2)
             {
                 val -= eval[i][j];
             }
@@ -187,15 +321,34 @@ void printLog()
     }
 }
 
+void addToLog(Point p)
+{
+    Log l;
+    if (p.depth == 0)
+    {
+        l.node = "root";
+    }
+    else
+    {
+        l.node = "a1";
+        l.node[0] = 'a' + p.y;
+        l.node[1] = '1' + p.x;
+    }
+    l.depth = p.depth;
+    l.value = p.value;
+    history.push(l);
+}
+
 int greedy()
 {
+    int rec[8][8];
     int max = -INF;
     int x = 0, y = 0;
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
         {
-            if(legal(i, j))
+            if(legal(i, j, rec))
             {
                 int tmp = val() + eval[i][j];
                 if(tmp > max)
@@ -215,101 +368,55 @@ int greedy()
     return FALSE;
 }
 
-int minimax()
+
+int minimax(Point* root)
 {
-    stack<Point> s;
-    Point root;
-    root.value = -INF;
-    root.depth = 0;
-    root.parent = NULL;
-    root.child = NULL;
-    s.push(root);
-    while(!s.empty())
+    int rec[8][8];
+    ply = (ply + 1) % 2;
+    if(root->depth == depth)
     {
-        Point cur = s.top();
-        s.pop();
-        Log l;
-        if (cur.depth == 0)
-        {
-            l.node = "root";
-        }
-        else
-        {
-            l.node[0] = 'a' + cur.x;
-            l.node[1] = '1' + cur.y;
-            l.node[2] = 0;
-        }
-        l.depth = cur.depth;
-        l.value = cur.value;
-        history.push(l);
-        if(cur.depth > 0)
-        {
-            if(cur.depth % 2 == 1)
-            {
-                map[cur.x][cur.y] = ply;
-            }
-            else
-            {
-                map[cur.x][cur.y] = (ply + 1) % 2;
-            }
-        }
-        if(cur.depth == depth)
-        {
-            while(cur.depth >= s.top().depth)
-            {
-                cur.value = (cur.depth % 2 == 0) ? val() : -val();
-                map[cur.x][cur.y] = 2;
-                if (cur.parent->depth % 2 == 0)
-                {
-                    cur.parent->value = (cur.parent->value < cur.value) ? cur.value : cur.parent->value;
-                    cur.parent->child = &cur;
-                }
-                else
-                {
-                    cur.parent->value = (cur.parent->value > cur.value) ? cur.value : cur.parent->value;
-                    cur.parent->child = &cur;
-                }
-                cur = *cur.parent;
-            }
-        }
-        else
-        {
-            if(cur.depth % 2 == 1)
-            {
-                ply = (ply + 1) % 2;
-            }
-            for (int i = 0; i < 8; i++)
-            {
-                for (int j = 0; j < 8; j++)
-                {
-                    if (legal(i, j))
-                    {
-                        Point tmp;
-                        tmp.x = i;
-                        tmp.y = j;
-                        tmp.value = (cur.depth % 2 == 0) ? INF : -INF;
-                        tmp.depth = cur.depth + 1;
-                        tmp.parent = &cur;
-                        tmp.child = NULL;
-                        s.push(tmp);
-                    }
-                }
-            }
-            if(cur.depth % 2 == 1)
-            {
-                ply = (ply + 1) % 2;
-            }
-        }
-    }
-    if (root.child != NULL)
-    {
-        map[root.child->x][root.child->y] = ply;
-        return TRUE;
+        root->value = val();
+        addToLog(*root);
     }
     else
     {
+        addToLog(*root);
+        root->child = NULL;
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (legal(i, j, rec))
+                {
+                    Point* tmp = new Point();
+                    tmp->x = i;
+                    tmp->y = j;
+                    tmp->value = (root->depth % 2 == 0) ? INF : -INF;
+                    tmp->depth = root->depth + 1;
+                    tmp->child = NULL;
+                    minimax(tmp);
+                    if(root->depth % 2 == 0 && root->value < tmp->value)
+                    {
+                        root->value = tmp->value;
+                        root->child = tmp;
+                    }
+                    else if (root->depth % 2 == 1 && root->value > tmp->value)
+                    {
+                        root->value = tmp->value;
+                        root->child = tmp;
+                    }
+                    addToLog(*root);
+                    backup(rec);
+                }
+            }
+        }
+    }
+    ply = (ply + 1) % 2;
+    if(root->child == NULL)
+    {
         return FALSE;
     }
+    return TRUE;
 }
 
 
@@ -317,8 +424,8 @@ int main(int argc, const char * argv[]) {
     int task_no;
     string player, states;
     FILE *in, *out;
-    //in = freopen("input.txt", "r", stdin);
-    //out = freopen("output.txt", "w", stdout);
+    in = freopen("input.txt", "r", stdin);
+    out = freopen("output.txt", "w", stdout);
     cin>>task_no>>player>>depth;
     if(player[0] == 'X')
     {
@@ -354,7 +461,17 @@ int main(int argc, const char * argv[]) {
     }
     else if(task_no == 2)
     {
-        minimax();
+        Point root;
+        root.value = -INF;
+        root.depth = 0;
+        ply = (ply + 1) % 2;
+        int ans = minimax(&root);
+        if(ans)
+        {
+            ply = (ply + 1) % 2;
+            int rec[8][8];
+            legal(root.child->x, root.child->y, rec);
+        }
         print();
         printLog();
     }
