@@ -31,6 +31,8 @@ struct Point
     int value;
     int depth;
     Point* child;
+    int alpha;
+    int beta;
 };
 
 struct Log
@@ -38,6 +40,8 @@ struct Log
     string node;
     int depth;
     int value;
+    int alpha;
+    int beta;
 };
 
 queue<Log> history;
@@ -255,7 +259,7 @@ void backup(int rec[][8])
     }
 }
 
-int val()
+int valueOfEvaluation()
 {
     int val = 0;
     for (int i = 0; i < 8; i++)
@@ -298,30 +302,53 @@ void print()
     }
 }
 
-void printLog()
+void printValue(int value)
 {
+    if (value == INF)
+    {
+        cout<<"Infinity";
+    }
+    else if(value == -INF)
+    {
+        cout<<"-Infinity";
+    }
+    else
+    {
+        cout<<value;
+    }
+}
+
+void printLog4Minimax()
+{
+    cout<<"Node,Depth,Value"<<endl;
     while(history.size() > 0)
     {
         Log l = history.front();
         cout<<l.node<<","<<l.depth<<",";
-        if (l.value == INF)
-        {
-            cout<<"Infinity";
-        }
-        else if(l.value == -INF)
-        {
-            cout<<"-Infinity";
-        }
-        else
-        {
-            cout<<l.value;
-        }
+        printValue(l.value);
         cout<<endl;
         history.pop();
     }
 }
 
-void addToLog(Point p)
+void printLog4Alphabeta()
+{
+    cout<<"Node,Depth,Value,Alpha,Beta"<<endl;
+    while(history.size() > 0)
+    {
+        Log l = history.front();
+        cout<<l.node<<","<<l.depth<<",";
+        printValue(l.value);
+        cout<<",";
+        printValue(l.alpha);
+        cout<<",";
+        printValue(l.beta);
+        cout<<endl;
+        history.pop();
+    }
+}
+
+void addToLog4Minimax(Point p)
 {
     Log l;
     if (p.depth == 0)
@@ -339,6 +366,26 @@ void addToLog(Point p)
     history.push(l);
 }
 
+void addToLog4Alphabeta(Point p)
+{
+    Log l;
+    if (p.depth == 0)
+    {
+        l.node = "root";
+    }
+    else
+    {
+        l.node = "a1";
+        l.node[0] = 'a' + p.y;
+        l.node[1] = '1' + p.x;
+    }
+    l.depth = p.depth;
+    l.value = p.value;
+    l.alpha = p.alpha;
+    l.beta = p.beta;
+    history.push(l);
+}
+
 int greedy()
 {
     int rec[8][8];
@@ -350,19 +397,20 @@ int greedy()
         {
             if(legal(i, j, rec))
             {
-                int tmp = val() + eval[i][j];
+                int tmp = valueOfEvaluation();
                 if(tmp > max)
                 {
                     max = tmp;
                     x = i;
                     y = j;
                 }
+                backup(rec);
             }
         }
     }
     if(max != -INF)
     {
-        map[x][y] = ply;
+        legal(x, y, rec);
         return TRUE;
     }
     return FALSE;
@@ -375,12 +423,12 @@ int minimax(Point* root)
     ply = (ply + 1) % 2;
     if(root->depth == depth)
     {
-        root->value = val();
-        addToLog(*root);
+        root->value = valueOfEvaluation();
+        addToLog4Minimax(*root);
     }
     else
     {
-        addToLog(*root);
+        addToLog4Minimax(*root);
         root->child = NULL;
         for (int i = 0; i < 8; i++)
         {
@@ -405,7 +453,7 @@ int minimax(Point* root)
                         root->value = tmp->value;
                         root->child = tmp;
                     }
-                    addToLog(*root);
+                    addToLog4Minimax(*root);
                     backup(rec);
                 }
             }
@@ -419,6 +467,65 @@ int minimax(Point* root)
     return TRUE;
 }
 
+int alphabeta(Point* root)
+{
+    int rec[8][8];
+    ply = (ply + 1) % 2;
+    if(root->depth == depth)
+    {
+        root->value = valueOfEvaluation();
+        addToLog4Alphabeta(*root);
+    }
+    else
+    {
+        addToLog4Alphabeta(*root);
+        root->child = NULL;
+        int flag = TRUE;
+        for (int i = 0; i < 8 && flag; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (legal(i, j, rec))
+                {
+                    Point* tmp = new Point();
+                    tmp->x = i;
+                    tmp->y = j;
+                    tmp->value = (root->depth % 2 == 0) ? INF : -INF;
+                    tmp->depth = root->depth + 1;
+                    tmp->alpha = root->alpha;
+                    tmp->beta = root->beta;
+                    tmp->child = NULL;
+                    alphabeta(tmp);
+                    if(root->depth % 2 == 0 && root->value < tmp->value)
+                    {
+                        root->value = tmp->value;
+                        root->alpha = tmp->value;
+                        root->child = tmp;
+                    }
+                    else if (root->depth % 2 == 1 && root->value > tmp->value)
+                    {
+                        root->value = tmp->value;
+                        root->beta = tmp->value;
+                        root->child = tmp;
+                    }
+                    addToLog4Alphabeta(*root);
+                    backup(rec);
+                    if(root->alpha >= root->beta)
+                    {
+                        flag = FALSE;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    ply = (ply + 1) % 2;
+    if(root->child == NULL)
+    {
+        return FALSE;
+    }
+    return TRUE;
+}
 
 int main(int argc, const char * argv[]) {
     int task_no;
@@ -473,7 +580,25 @@ int main(int argc, const char * argv[]) {
             legal(root.child->x, root.child->y, rec);
         }
         print();
-        printLog();
+        printLog4Minimax();
+    }
+    else if(task_no == 3)
+    {
+        Point root;
+        root.value = -INF;
+        root.depth = 0;
+        root.alpha = -INF;
+        root.beta = INF;
+        ply = (ply + 1) % 2;
+        int ans = alphabeta(&root);
+        if(ans)
+        {
+            ply = (ply + 1) % 2;
+            int rec[8][8];
+            legal(root.child->x, root.child->y, rec);
+        }
+        print();
+        printLog4Alphabeta();
     }
     fclose(in);
     fclose(out);
