@@ -7,12 +7,54 @@
 
 #define TRUE 1
 #define FALSE 0
-#define INF 9999999
+#define INF 2147483647
+
+#define EMPTY 2
+#define XPOS 1
+#define OPOS 0
+#define ZERO 3
+
+#define STABLE 0
+#define SEMISTABLE 1
+#define UNSTABLE 2
+
+#define ZEROLINE 0
+#define STABLELINE 4
+
+#define WIN 1
+#define TIE 0
+#define LOSS -1
 
 using namespace std;
 
 int map[8][8];
-int ply, depth;
+
+int edgeWeight[7][3] = {
+    {700, 0, 0},        // Corner
+    {1200, 200, -25},   // C-Square
+    {1000, 200, 75},    // A-Square
+    {1000, 200, 50},    // B-Square
+    {1000, 200, 50},    // B-Square
+    {1000, 200, 75},    // A-Square
+    {1200, 200, -25}    // C-Square
+};
+
+int edgePoint[4][7][2] = {
+    {{0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}},
+    {{0, 7}, {1, 7}, {2, 7}, {3, 7}, {4, 7}, {5, 7}, {6, 7}},
+    {{7, 7}, {7, 6}, {7, 5}, {7, 4}, {7, 3}, {7, 2}, {7, 1}},
+    {{7, 0}, {6, 0}, {5, 0}, {4, 0}, {3, 0}, {2, 0}, {1, 0}}
+};
+
+int xSquarePoint[4][2] = {
+    {1, 1}, {1, 6}, {6, 6}, {6, 1}
+};
+
+int edgeStabilityMap[6561][8];
+
+int internalStabilityMap[8][8];
+
+int ply, depth, moveNumber;
 
 int eval[8][8] = {
     {99, -8, 8, 6, 6, 8, -8, 99},
@@ -24,15 +66,32 @@ int eval[8][8] = {
     {-8, -24, -4, -3, -3, -4, -24, -8},
     {99, -8, 8, 6, 6, 8, -8, 99}
 };
-struct Point
+struct point
 {
     int x;
     int y;
     int value;
     int depth;
-    Point* child;
+    point* child;
     int alpha;
     int beta;
+    int pass;
+    point(){}
+    point(int value, int depth)
+    {
+        this->value = value;
+        this->depth = depth;
+        this->child = NULL;
+    }
+    point(int value, int depth, int alpha, int beta)
+    {
+        this->value = value;
+        this->depth = depth;
+        this->alpha = alpha;
+        this->beta = beta;
+        this->child = NULL;
+        this->pass = FALSE;
+    }
 };
 
 struct Log
@@ -46,31 +105,36 @@ struct Log
 
 queue<Log> history;
 
-void init(int rec[][8])
+void init(int rec[][8], int val)
 {
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
         {
-            rec[i][j] = 3;
+            rec[i][j] = val;
         }
     }
 }
 
-int legal(int x, int y, int rec[][8])
+int legal(int x, int y, int rec[][8], int op)
 {
     int a, b, c = FALSE;
     a = FALSE; b = FALSE;
+    if(map[x][y] != EMPTY)
+    {
+        return FALSE;
+    }
     // X+ Direction
     for (int i = x + 1; i < 8; i++)
     {
-        if(map[i][y] == ply && a == TRUE) b = TRUE;
-        if(map[i][y] == (ply + 1) % 2) a = TRUE;
+        if(map[i][y] == ply && a) b = TRUE;
+        else if(map[i][y] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == TRUE)
+    if(b && !op) return TRUE;
+    if(b)
     {
-        if(!c) init(rec);
+        if(!c) init(rec, ZERO);
         for (int i = x + 1; i < 8; i++)
         {
             if(map[i][y] == (ply + 1) % 2)
@@ -86,13 +150,14 @@ int legal(int x, int y, int rec[][8])
     // X- Direction
     for (int i = x - 1; i >= 0; i--)
     {
-        if(map[i][y] == ply && a == TRUE) b = TRUE;
-        if(map[i][y] == (ply + 1) % 2) a = TRUE;
+        if(map[i][y] == ply && a) b = TRUE;
+        else if(map[i][y] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == TRUE)
+    if(b && !op) return TRUE;
+    if(b)
     {
-        if(!c) init(rec);
+        if(!c) init(rec, ZERO);
         for (int i = x - 1; i >= 0; i--)
         {
             if(map[i][y] == (ply + 1) % 2)
@@ -108,13 +173,14 @@ int legal(int x, int y, int rec[][8])
     // Y+ Direction
     for (int j = y + 1; j < 8; j++)
     {
-        if(map[x][j] == ply && a == TRUE) b = TRUE;
-        if(map[x][j] == (ply + 1) % 2) a = TRUE;
+        if(map[x][j] == ply && a) b = TRUE;
+        else if(map[x][j] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == TRUE)
+    if(b && !op) return TRUE;
+    if(b)
     {
-        if(!c) init(rec);
+        if(!c) init(rec, ZERO);
         for (int j = y + 1; j < 8; j++)
         {
             if(map[x][j] == (ply + 1) % 2)
@@ -130,13 +196,14 @@ int legal(int x, int y, int rec[][8])
     // Y- Direction
     for (int j = y - 1; j >= 0; j--)
     {
-        if(map[x][j] == ply && a == TRUE) b = TRUE;
-        if(map[x][j] == (ply + 1) % 2) a = TRUE;
+        if(map[x][j] == ply && a) b = TRUE;
+        else if(map[x][j] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == TRUE)
+    if(b && !op) return TRUE;
+    if(b)
     {
-        if(!c) init(rec);
+        if(!c) init(rec, ZERO);
         for (int j = y - 1; j >= 0; j--)
         {
             if(map[x][j] == (ply + 1) % 2)
@@ -152,13 +219,14 @@ int legal(int x, int y, int rec[][8])
     // X+Y+ Direction
     for (int i = x + 1, j = y + 1; i < 8 && j < 8; i++, j++)
     {
-        if(map[i][j] == ply && a == TRUE) b = TRUE;
-        if(map[i][j] == (ply + 1) % 2) a = TRUE;
+        if(map[i][j] == ply && a) b = TRUE;
+        else if(map[i][j] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == TRUE)
+    if(b && !op) return TRUE;
+    if(b)
     {
-        if(!c) init(rec);
+        if(!c) init(rec, ZERO);
         for (int i = x + 1, j = y + 1; i < 8 && j < 8; i++, j++)
         {
             if(map[i][j] == (ply + 1) % 2)
@@ -174,13 +242,14 @@ int legal(int x, int y, int rec[][8])
     // X-Y- Direction
     for (int i = x - 1, j = y - 1; i >= 0 && j >= 0; i--, j--)
     {
-        if(map[i][j] == ply && a == TRUE) b = TRUE;
-        if(map[i][j] == (ply + 1) % 2) a = TRUE;
+        if(map[i][j] == ply && a) b = TRUE;
+        else if(map[i][j] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == TRUE)
+    if(b && !op) return TRUE;
+    if(b)
     {
-        if(!c) init(rec);
+        if(!c) init(rec, ZERO);
         for (int i = x - 1, j = y - 1; i >= 0 && j >= 0; i--, j--)
         {
             if(map[i][j] == (ply + 1) % 2)
@@ -196,16 +265,17 @@ int legal(int x, int y, int rec[][8])
     // X+Y- Direction
     for (int i = x + 1, j = y - 1; i < 8 && j >= 0; i++, j--)
     {
-        if(map[i][j] == ply && a == TRUE) b = TRUE;
-        if(map[i][j] == (ply + 1) % 2) a = TRUE;
+        if(map[i][j] == ply && a) b = TRUE;
+        else if(map[i][j] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == TRUE)
+    if(b && !op) return TRUE;
+    if(b)
     {
-        if(!c) init(rec);
+        if(!c) init(rec, ZERO);
         for (int i = x + 1, j = y - 1; i < 8 && j >= 0; i++, j--)
         {
-            if(map[i][j] == ply && a == TRUE)
+            if(map[i][j] == (ply + 1) % 2)
             {
                 rec[i][j] = map[i][j];
                 map[i][j] = ply;
@@ -218,13 +288,14 @@ int legal(int x, int y, int rec[][8])
     // X-Y+ Direction
     for (int i = x - 1, j = y + 1; i >= 0 && j < 8; i--, j++)
     {
-        if(map[i][j] == ply && a == TRUE) b = TRUE;
-        if(map[i][j] == (ply + 1) % 2) a = TRUE;
+        if(map[i][j] == ply && a) b = TRUE;
+        else if(map[i][j] == (ply + 1) % 2) a = TRUE;
         else break;
     }
-    if(b == TRUE)
+    if(b && !op) return TRUE;
+    if(b)
     {
-        if(!c) init(rec);
+        if(!c) init(rec, ZERO);
         for (int i = x - 1, j = y + 1; i >= 0 && j < 8; i--, j++)
         {
             if(map[i][j] == (ply + 1) % 2)
@@ -270,7 +341,7 @@ int valueOfEvaluation()
             {
                 val += eval[i][j];
             }
-            else if(map[i][j] != 2)
+            else if(map[i][j] == (ply + 1) % 2)
             {
                 val -= eval[i][j];
             }
@@ -348,12 +419,16 @@ void printLog4Alphabeta()
     }
 }
 
-void addToLog4Minimax(Point p)
+void addToLog4Minimax(point p)
 {
     Log l;
     if (p.depth == 0)
     {
         l.node = "root";
+    }
+    else if(p.pass)
+    {
+        l.node = "pass";
     }
     else
     {
@@ -366,12 +441,16 @@ void addToLog4Minimax(Point p)
     history.push(l);
 }
 
-void addToLog4Alphabeta(Point p)
+void addToLog4Alphabeta(point p)
 {
     Log l;
     if (p.depth == 0)
     {
         l.node = "root";
+    }
+    else if(p.pass)
+    {
+        l.node = "pass";
     }
     else
     {
@@ -395,7 +474,7 @@ int greedy()
     {
         for (int j = 0; j < 8; j++)
         {
-            if(legal(i, j, rec))
+            if(legal(i, j, rec, TRUE))
             {
                 int tmp = valueOfEvaluation();
                 if(tmp > max)
@@ -410,14 +489,14 @@ int greedy()
     }
     if(max != -INF)
     {
-        legal(x, y, rec);
+        legal(x, y, rec, TRUE);
         return TRUE;
     }
     return FALSE;
 }
 
 
-int minimax(Point* root)
+int minimax(point* root)
 {
     int rec[8][8];
     ply = (ply + 1) % 2;
@@ -429,19 +508,17 @@ int minimax(Point* root)
     else
     {
         addToLog4Minimax(*root);
-        root->child = NULL;
+        int visited = FALSE;
         for (int i = 0; i < 8; i++)
         {
             for (int j = 0; j < 8; j++)
             {
-                if (legal(i, j, rec))
+                if (legal(i, j, rec, TRUE))
                 {
-                    Point* tmp = new Point();
+                    visited = TRUE;
+                    point* tmp = new point((root->depth % 2 == 0) ? INF : -INF, root->depth + 1);
                     tmp->x = i;
                     tmp->y = j;
-                    tmp->value = (root->depth % 2 == 0) ? INF : -INF;
-                    tmp->depth = root->depth + 1;
-                    tmp->child = NULL;
                     minimax(tmp);
                     if(root->depth % 2 == 0 && root->value < tmp->value)
                     {
@@ -458,6 +535,23 @@ int minimax(Point* root)
                 }
             }
         }
+        if(!visited)
+        {
+            point* tmp = new point((root->depth % 2 == 0) ? INF : -INF, root->depth + 1);
+            tmp->pass = TRUE;
+            minimax(tmp);
+            if(root->depth % 2 == 0 && root->value < tmp->value)
+            {
+                root->value = tmp->value;
+                root->child = tmp;
+            }
+            else if (root->depth % 2 == 1 && root->value > tmp->value)
+            {
+                root->value = tmp->value;
+                root->child = tmp;
+            }
+            addToLog4Minimax(*root);
+        }
     }
     ply = (ply + 1) % 2;
     if(root->child == NULL)
@@ -467,7 +561,7 @@ int minimax(Point* root)
     return TRUE;
 }
 
-int alphabeta(Point* root)
+int alphabeta(point* root)
 {
     int rec[8][8];
     ply = (ply + 1) % 2;
@@ -479,33 +573,30 @@ int alphabeta(Point* root)
     else
     {
         addToLog4Alphabeta(*root);
-        root->child = NULL;
-        int flag = TRUE;
+        int flag = TRUE, visited = FALSE;
         for (int i = 0; i < 8 && flag; i++)
         {
             for (int j = 0; j < 8; j++)
             {
-                if (legal(i, j, rec))
+                if (legal(i, j, rec, TRUE))
                 {
-                    Point* tmp = new Point();
+                    visited = TRUE;
+                    point* tmp = new point((root->depth % 2 == 0) ? INF : -INF, root->depth + 1, root->alpha, root->beta);
                     tmp->x = i;
                     tmp->y = j;
-                    tmp->value = (root->depth % 2 == 0) ? INF : -INF;
-                    tmp->depth = root->depth + 1;
-                    tmp->alpha = root->alpha;
-                    tmp->beta = root->beta;
-                    tmp->child = NULL;
                     alphabeta(tmp);
                     if(root->depth % 2 == 0 && root->value < tmp->value)
                     {
                         root->value = tmp->value;
                         root->alpha = tmp->value;
+                        if(root->child != NULL) delete root->child;
                         root->child = tmp;
                     }
                     else if (root->depth % 2 == 1 && root->value > tmp->value)
                     {
                         root->value = tmp->value;
                         root->beta = tmp->value;
+                        if(root->child != NULL) delete root->child;
                         root->child = tmp;
                     }
                     addToLog4Alphabeta(*root);
@@ -518,6 +609,25 @@ int alphabeta(Point* root)
                 }
             }
         }
+        if(!visited)
+        {
+            point* tmp = new point((root->depth % 2 == 0) ? INF : -INF, root->depth + 1, root->alpha, root->beta);
+            tmp->pass = TRUE;
+            alphabeta(tmp);
+            if(root->depth % 2 == 0 && root->value < tmp->value)
+            {
+                root->value = tmp->value;
+                root->alpha = tmp->value;
+                root->child = tmp;
+            }
+            else if (root->depth % 2 == 1 && root->value > tmp->value)
+            {
+                root->value = tmp->value;
+                root->beta = tmp->value;
+                root->child = tmp;
+            }
+            addToLog4Alphabeta(*root);
+        }
     }
     ply = (ply + 1) % 2;
     if(root->child == NULL)
@@ -527,13 +637,548 @@ int alphabeta(Point* root)
     return TRUE;
 }
 
+
+int xSquareCost()
+{
+    int sum = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        if(map[xSquarePoint[i][0]][xSquarePoint[i][1]] == ply
+           && map[edgePoint[i][0][0]][edgePoint[i][0][1]] == EMPTY)
+        {
+            int tmp = 0;
+            int a = FALSE, b = FALSE;
+            for (int j = 1; j < 7; j++)
+            {
+                if(map[edgePoint[i][j][0]][edgePoint[i][j][1]] == ply) a = TRUE;
+                else if(map[edgePoint[i][j][0]][edgePoint[i][j][1]] == (ply + 1) % 2 && a) b = TRUE;
+                else break;
+            }
+            if(b)
+            {
+                tmp += (ply + 1) % 2;
+                for(int j = 1; j < 7; j++)
+                {
+                    if(map[edgePoint[i][j][0]][edgePoint[i][j][1]] == (ply + 1) % 2) break;
+                    tmp *= 3;
+                    tmp += ply;
+                }
+                for (int j = 1; j < 7; j++)
+                {
+                    if(map[edgePoint[i][j][0]][edgePoint[i][j][1]] == (ply + 1) % 2) break;
+                    sum -= edgeWeight[j][edgeStabilityMap[tmp][j]];
+                }
+            }
+            tmp = 0;
+            a = FALSE, b = FALSE;
+            for (int j = 1; j < 7; j++)
+            {
+                if(map[edgePoint[(i + 1) % 4][j][0]][edgePoint[(i + 1) % 4][j][1]] == ply) a = TRUE;
+                else if(map[edgePoint[(i + 1) % 4][j][0]][edgePoint[(i + 1) % 4][j][1]] == (ply + 1) % 2 && a) b = TRUE;
+                else break;
+            }
+            if(b)
+            {
+                tmp += (ply + 1) % 2;
+                for(int j = 1; j < 7; j++)
+                {
+                    if(map[edgePoint[(i + 1) % 4][j][0]][edgePoint[(i + 1) % 4][j][1]] == (ply + 1) % 2) break;
+                    tmp *= 3;
+                    tmp += ply;
+                }
+                for (int j = 1; j < 7; j++)
+                {
+                    if(map[edgePoint[(i + 1) % 4][j][0]][edgePoint[(i + 1) % 4][j][1]] == (ply + 1) % 2) break;
+                    sum -= edgeWeight[j][edgeStabilityMap[tmp][j]];
+                }
+            }
+        }
+        if(map[xSquarePoint[i][0]][xSquarePoint[i][1]] == (ply + 1) % 2
+           && map[edgePoint[i][0][0]][edgePoint[i][0][1]] == EMPTY)
+        {
+            int tmp = 0;
+            int a = FALSE, b = FALSE;
+            for (int j = 1; j < 7; j++)
+            {
+                if(map[edgePoint[i][j][0]][edgePoint[i][j][1]] == (ply + 1) % 2) a = TRUE;
+                else if(map[edgePoint[i][j][0]][edgePoint[i][j][1]] == ply && a) b = TRUE;
+                else break;
+            }
+            if(b)
+            {
+                tmp += ply;
+                for(int j = 1; j < 7; j++)
+                {
+                    if(map[edgePoint[i][j][0]][edgePoint[i][j][1]] == ply) break;
+                    tmp *= 3;
+                    tmp += (ply + 1) % 2;
+                }
+                for (int j = 1; j < 7; j++)
+                {
+                    if(map[edgePoint[i][j][0]][edgePoint[i][j][1]] == ply) break;
+                    sum += edgeWeight[j][edgeStabilityMap[tmp][j]];
+                }
+            }
+            tmp = 0;
+            a = FALSE, b = FALSE;
+            for (int j = 1; j < 7; j++)
+            {
+                if(map[edgePoint[(i + 1) % 4][j][0]][edgePoint[(i + 1) % 4][j][1]] == (ply + 1) % 2) a = TRUE;
+                else if(map[edgePoint[(i + 1) % 4][j][0]][edgePoint[(i + 1) % 4][j][1]] == ply && a) b = TRUE;
+                else break;
+            }
+            if(b)
+            {
+                tmp += ply;
+                for(int j = 1; j < 7; j++)
+                {
+                    if(map[edgePoint[(i + 1) % 4][j][0]][edgePoint[(i + 1) % 4][j][1]] == ply) break;
+                    tmp *= 3;
+                    tmp += (ply + 1) % 2;
+                }
+                for (int j = 1; j < 7; j++)
+                {
+                    if(map[edgePoint[(i + 1) % 4][j][0]][edgePoint[(i + 1) % 4][j][1]] == ply) break;
+                    sum += edgeWeight[j][edgeStabilityMap[tmp][j]];
+                }
+            }
+        }
+    }
+    return FALSE;
+}
+
+int edgeStability()
+{
+    int sum = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        int tmp = 0;
+        for (int j = 0; j < 7; j++)
+        {
+            tmp *= 3;
+            tmp += map[edgePoint[i][j][0]][edgePoint[i][j][1]];
+        }
+        for (int j = 0; j < 7; j++)
+        {
+            if(map[edgePoint[i][j][0]][edgePoint[i][j][1]] == ply)
+            {
+                sum += edgeWeight[j][edgeStabilityMap[tmp][j]];
+            }
+            else if(map[edgePoint[i][j][0]][edgePoint[i][j][1]] == (ply + 1) % 2)
+            {
+                sum -= edgeWeight[j][edgeStabilityMap[tmp][j]];
+            }
+        }
+    }
+    return sum + xSquareCost();
+}
+
+int internalStability()
+{
+    queue<point> q;
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            internalStabilityMap[i][j] = ZEROLINE;
+        }
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        int tmp = 0;
+        for (int j = 0; j < 7; j++)
+        {
+            tmp *= 3;
+            tmp += map[edgePoint[i][j][0]][edgePoint[i][j][1]];
+        }
+        for (int j = 0; j < 7; j++)
+        {
+            if(edgeStabilityMap[tmp][j] == STABLE && map[edgePoint[i][j][0]][edgePoint[i][j][1]] != EMPTY)
+            {
+                internalStabilityMap[edgePoint[i][j][0]][edgePoint[i][j][1]] = STABLELINE;
+                point *p = new point();
+                p->x = edgePoint[i][j][0];
+                p->y = edgePoint[i][j][1];
+                q.push(*p);
+            }
+        }
+    }
+    while(!q.empty())
+    {
+        point *cur = &(q.front());
+        q.pop();
+        if(cur->x > 0 && map[cur->x - 1][cur->y] == map[cur->x][cur->y]
+           && internalStabilityMap[cur->x - 1][cur->y] < STABLELINE)
+        {
+            internalStabilityMap[cur->x - 1][cur->y]++;
+            if(internalStabilityMap[cur->x - 1][cur->y] == STABLELINE)
+            {
+                point *p = new point();
+                p->x = cur->x - 1;
+                p->y = cur->y;
+                q.push(*p);
+            }
+        }
+        if(cur->x < 7 && map[cur->x + 1][cur->y] == map[cur->x][cur->y]
+           && internalStabilityMap[cur->x + 1][cur->y] < STABLELINE)
+        {
+            internalStabilityMap[cur->x + 1][cur->y]++;
+            if(internalStabilityMap[cur->x + 1][cur->y] == STABLELINE)
+            {
+                point *p = new point();
+                p->x = cur->x + 1;
+                p->y = cur->y;
+                q.push(*p);
+            }
+        }
+        if(cur->y > 0 && map[cur->x][cur->y - 1] == map[cur->x][cur->y]
+           && internalStabilityMap[cur->x][cur->y - 1] < STABLELINE)
+        {
+            internalStabilityMap[cur->x][cur->y - 1]++;
+            if(internalStabilityMap[cur->x][cur->y - 1] == STABLELINE)
+            {
+                point *p = new point();
+                p->x = cur->x;
+                p->y = cur->y - 1;
+                q.push(*p);
+            }
+        }
+        if(cur->y < 7 && map[cur->x][cur->y + 1] == map[cur->x][cur->y]
+           && internalStabilityMap[cur->x][cur->y + 1] < STABLELINE)
+        {
+            internalStabilityMap[cur->x][cur->y + 1]++;
+            if(internalStabilityMap[cur->x][cur->y + 1] == STABLELINE)
+            {
+                point *p = new point();
+                p->x = cur->x;
+                p->y = cur->y + 1;
+                q.push(*p);
+            }
+        }
+        if(cur->x > 0 && cur->y > 0 && map[cur->x - 1][cur->y - 1] == map[cur->x][cur->y]
+           && internalStabilityMap[cur->x - 1][cur->y - 1] < STABLELINE)
+        {
+            internalStabilityMap[cur->x - 1][cur->y - 1]++;
+            if(internalStabilityMap[cur->x - 1][cur->y - 1] == STABLELINE)
+            {
+                point *p = new point();
+                p->x = cur->x - 1;
+                p->y = cur->y - 1;
+                q.push(*p);
+            }
+        }
+        if(cur->x < 7 && cur->y < 7 && map[cur->x + 1][cur->y + 1] == map[cur->x][cur->y]
+           && internalStabilityMap[cur->x + 1][cur->y + 1] < STABLELINE)
+        {
+            internalStabilityMap[cur->x + 1][cur->y + 1]++;
+            if(internalStabilityMap[cur->x + 1][cur->y + 1] == STABLELINE)
+            {
+                point *p = new point();
+                p->x = cur->x + 1;
+                p->y = cur->y + 1;
+                q.push(*p);
+            }
+        }
+        if(cur->x > 0 && cur->y < 7 && map[cur->x - 1][cur->y + 1] == map[cur->x][cur->y]
+           && internalStabilityMap[cur->x - 1][cur->y + 1] < STABLELINE)
+        {
+            internalStabilityMap[cur->x - 1][cur->y + 1]++;
+            if(internalStabilityMap[cur->x - 1][cur->y + 1] == STABLELINE)
+            {
+                point *p = new point();
+                p->x = cur->x - 1;
+                p->y = cur->y + 1;
+                q.push(*p);
+            }
+        }
+        if(cur->x < 7 && cur->y > 0 && map[cur->x + 1][cur->y - 1] == map[cur->x][cur->y]
+           && internalStabilityMap[cur->x + 1][cur->y - 1] < STABLELINE)
+        {
+            internalStabilityMap[cur->x + 1][cur->y - 1]++;
+            if(internalStabilityMap[cur->x + 1][cur->y - 1] == STABLELINE)
+            {
+                point *p = new point();
+                p->x = cur->x + 1;
+                p->y = cur->y - 1;
+                q.push(*p);
+            }
+        }
+        //delete cur;
+    }
+    int pCount = 0, oCount = 0;
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if(map[i][j] == ply && internalStabilityMap[i][j] == STABLELINE) pCount++;
+            if(map[i][j] == (ply + 1) % 2 && internalStabilityMap[i][j] == STABLELINE) oCount++;
+        }
+    }
+    return pCount - oCount;
+}
+
+int currentMobility()
+{
+    int pCount = 0, oCount = 0;
+    int rec[8][8];
+    for(int i = 0; i < 8; i++)
+    {
+        for(int j = 0; j < 8; j++)
+        {
+            if(legal(i, j, rec, FALSE))
+            {
+                pCount++;
+            }
+        }
+    }
+    ply = (ply + 1) % 2;
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if(legal(i, j, rec, FALSE))
+            {
+                oCount++;
+            }
+        }
+    }
+    ply = (ply + 1) % 2;
+    return 100 * (pCount - oCount)/(pCount + oCount + 2);
+}
+
+int potentialMobility()
+{
+    int sumOfOppo = 0, sumOfEmpty = 0, sumOfOppos = 0;
+    int oppo = (ply + 1) % 2;
+    int rec[8][8];
+    init(rec, 0);
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if(map[i][j] == oppo)
+            {
+                if(i > 0 && map[i-1][j] == EMPTY)
+                {
+                    rec[i][j]++;
+                    rec[i-1][j]++;
+                }
+                if(j > 0 && map[i][j-1] == EMPTY)
+                {
+                    rec[i][j]++;
+                    rec[i][j-1]++;
+                }
+                if(i > 0 && j > 0 && map[i-1][j-1] == EMPTY)
+                {
+                    rec[i][j]++;
+                    rec[i-1][j-1]++;
+                }
+                if(i < 7 && map[i+1][j] == EMPTY)
+                {
+                    rec[i][j]++;
+                    rec[i+1][j]++;
+                }
+                if(j < 7 && map[i][j+1] == EMPTY)
+                {
+                    rec[i][j]++;
+                    rec[i][j+1]++;
+                }
+                if(i < 7 && j < 7 && map[i+1][j+1] == EMPTY)
+                {
+                    rec[i][j]++;
+                    rec[i+1][j+1]++;
+                }
+            }
+        }
+    }
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if(map[i][j] == oppo && rec[i][j])
+            {
+                sumOfOppos += rec[i][j];
+                sumOfOppo++;
+            }
+            if(map[i][j] == EMPTY && rec[i][j])
+            {
+                sumOfEmpty++;
+            }
+        }
+    }
+    return sumOfEmpty + sumOfOppo + sumOfOppos;
+}
+
+int finalDiscDifferential()
+{
+    int pCount = 0, oCount = 0;
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if(map[i][j] == ply)
+            {
+                pCount++;
+            }
+            else if(map[i][j] == (ply + 1) % 2)
+            {
+                oCount++;
+            }
+        }
+    }
+    return pCount - oCount;
+}
+
+int threeValueMeasure()
+{
+    int pCount = 0, oCount = 0;
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if(map[i][j] == ply)
+            {
+                pCount++;
+            }
+            else if(map[i][j] == (ply + 1) % 2)
+            {
+                oCount++;
+            }
+        }
+    }
+    if (pCount < oCount) return LOSS;
+    if (pCount > oCount) return WIN;
+    return TIE;
+}
+
+int valueOfEvaluation4Competition()
+{
+    if (moveNumber < 46)
+    {
+        int esac = 213 + 6.24 * moveNumber;
+        int cmac = (moveNumber < 25) ? (50 + 2 * moveNumber) : (75 + moveNumber);
+        return esac * edgeStability() + 36 * internalStability()
+        + cmac * currentMobility() + 99 * potentialMobility();
+    }
+    else if(moveNumber < 48)
+    {
+        return threeValueMeasure();
+    }
+    else
+    {
+        return finalDiscDifferential();
+    }
+}
+
+int competition(point* root)
+{
+    int rec[8][8];
+    ply = (ply + 1) % 2;
+    if(root->depth == depth)
+    {
+        root->value = valueOfEvaluation4Competition();
+    }
+    else
+    {
+        int flag = TRUE, visited = FALSE;
+        for (int i = 0; i < 8 && flag; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (legal(i, j, rec, TRUE))
+                {
+                    visited = TRUE;
+                    point* tmp = new point((root->depth % 2 == 0) ? INF : -INF, root->depth + 1, root->alpha, root->beta);
+                    tmp->x = i;
+                    tmp->y = j;
+                    competition(tmp);
+                    if(root->depth % 2 == 0 && root->value < tmp->value)
+                    {
+                        root->value = tmp->value;
+                        root->alpha = tmp->value;
+                        if(root->child != NULL) delete root->child;
+                        root->child = tmp;
+                    }
+                    else if (root->depth % 2 == 1 && root->value > tmp->value)
+                    {
+                        root->value = tmp->value;
+                        root->beta = tmp->value;
+                        if(root->child != NULL) delete root->child;
+                        root->child = tmp;
+                    }
+                    else delete tmp;
+                    backup(rec);
+                    if(root->alpha >= root->beta)
+                    {
+                        flag = FALSE;
+                        break;
+                    }
+                }
+            }
+        }
+        if(!visited)
+        {
+            point* tmp = new point((root->depth % 2 == 0) ? INF : -INF, root->depth + 1, root->alpha, root->beta);
+            tmp->pass = TRUE;
+            competition(tmp);
+            if(root->depth % 2 == 0 && root->value < tmp->value)
+            {
+                root->value = tmp->value;
+                root->alpha = tmp->value;
+                root->child = tmp;
+            }
+            else if (root->depth % 2 == 1 && root->value > tmp->value)
+            {
+                root->value = tmp->value;
+                root->beta = tmp->value;
+                root->child = tmp;
+            }
+        }
+    }
+    ply = (ply + 1) % 2;
+    if(root->child == NULL)
+    {
+        return FALSE;
+    }
+    return TRUE;
+}
+
+void importEdgeStabilityMap()
+{
+    FILE *fp = fopen("../../edgeStabilityGenerator/edgeStabilityGenerator/edgeStability.txt", "r");
+    for (int i = 0; i< 6561; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            fscanf(fp, "%d", &edgeStabilityMap[i][j]);
+        }
+    }
+    fclose(fp);
+}
+
+void depthAdjustment()
+{
+    moveNumber = 0;
+    for (int i = 0; i< 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if (map[i][j] != EMPTY)
+                moveNumber++;
+        }
+    }
+    moveNumber -= 4;
+    if(moveNumber < 46) depth = 5;
+    else depth = 10;
+}
+
 int main(int argc, const char * argv[]) {
-    int task_no;
+    int taskNumber;
     string player, states;
     FILE *in, *out;
-    in = freopen("input.txt", "r", stdin);
-    out = freopen("output.txt", "w", stdout);
-    cin>>task_no>>player>>depth;
+    //in = freopen("input.txt", "r", stdin);
+    //out = freopen("output.txt", "w", stdout);
+    cin>>taskNumber>>player>>depth;
     if(player[0] == 'X')
     {
         ply = 1;
@@ -561,44 +1206,53 @@ int main(int argc, const char * argv[]) {
             }
         }
     }
-    if(task_no == 1)
+    if(taskNumber == 1)
     {
         greedy();
         print();
     }
-    else if(task_no == 2)
+    else if(taskNumber == 2)
     {
-        Point root;
-        root.value = -INF;
-        root.depth = 0;
+        point* root = new point(-INF, 0);
         ply = (ply + 1) % 2;
-        int ans = minimax(&root);
+        int ans = minimax(root);
         if(ans)
         {
             ply = (ply + 1) % 2;
             int rec[8][8];
-            legal(root.child->x, root.child->y, rec);
+            legal(root->child->x, root->child->y, rec, TRUE);
         }
         print();
         printLog4Minimax();
     }
-    else if(task_no == 3)
+    else if(taskNumber == 3)
     {
-        Point root;
-        root.value = -INF;
-        root.depth = 0;
-        root.alpha = -INF;
-        root.beta = INF;
+        point* root = new point(-INF, 0, -INF, INF);
         ply = (ply + 1) % 2;
-        int ans = alphabeta(&root);
+        int ans = alphabeta(root);
         if(ans)
         {
             ply = (ply + 1) % 2;
             int rec[8][8];
-            legal(root.child->x, root.child->y, rec);
+            legal(root->child->x, root->child->y, rec, TRUE);
         }
         print();
         printLog4Alphabeta();
+    }
+    else if(taskNumber == 4)
+    {
+        importEdgeStabilityMap();
+        depthAdjustment();
+        point* root = new point(-INF, 0, -INF, INF);
+        ply = (ply + 1) % 2;
+        int ans = competition(root);
+        if(ans)
+        {
+            ply = (ply + 1) % 2;
+            int rec[8][8];
+            legal(root->child->x, root->child->y, rec, TRUE);
+        }
+        print();
     }
     fclose(in);
     fclose(out);
