@@ -1,0 +1,384 @@
+================1==================
+Evaluation count: 0
+Legal check count: 222800
+Time: 0.018ms.
+********
+********
+**OX****
+***OX***
+***XO***
+********
+********
+********
+================3==================
+Evaluation count: 0
+Legal check count: 138303
+Time: 0.028ms.
+********
+********
+*XXXO***
+***OO***
+***XO***
+********
+********
+********
+================5==================
+Evaluation count: 0
+Legal check count: 249144
+Time: 0.046ms.
+********
+*O******
+*XOXXX**
+***OX***
+***XO***
+********
+********
+********
+================7==================
+Evaluation count: 0
+Legal check count: 438974
+Time: 0.078ms.
+********
+*O******
+OOOXXX**
+***XX***
+**XXO***
+********
+********
+********
+================9==================
+Evaluation count: 0
+Legal check count: 327294
+Time: 0.102ms.
+********
+*O******
+OOOXXX**
+***OX***
+**XXO***
+*****O**
+******O*
+********
+================11==================
+Evaluation count: 0
+Legal check count: 1119887
+Time: 0.177ms.
+********
+*O******
+OOOXXX**
+***OOO**
+**XXX***
+****XO**
+******O*
+********
+================13==================
+Evaluation count: 0
+Legal check count: 3615281
+Time: 0.418ms.
+********
+*O****O*
+OOOXXO**
+***OOX**
+**XXX*X*
+****XO**
+******O*
+********
+================15==================
+Evaluation count: 0
+Legal check count: 2219994
+Time: 0.562ms.
+*******X
+*O****X*
+OOOXXX**
+***OXX*O
+**XXX*O*
+****XO**
+******O*
+********
+================17==================
+Evaluation count: 0
+Legal check count: 3014457
+Time: 0.753ms.
+*******X
+*O****X*
+OOOXXX**
+***OXX*O
+**XOX*X*
+***OOO*X
+******O*
+********
+================19==================
+Evaluation count: 0
+Legal check count: 3219517
+Time: 0.957ms.
+*******X
+*O****X*
+OOOXXX**
+***OXX*O
+**XOOOX*
+***OOX*X
+******X*
+*******X
+================21==================
+Evaluation count: 0
+Legal check count: 532611
+Time: 0.993ms.
+X*O****X
+*O****X*
+OOXXXX**
+***XXX*O
+**XOXOX*
+***OOX*X
+******X*
+*******X
+================23==================
+Evaluation count: 0
+Legal check count: 936308
+Time: 1.052ms.
+X*O****X
+*O**O*X*
+OOXXOX**
+***XOX*O
+**XOOXX*
+***OOXXX
+******X*
+*******X
+================25==================
+Evaluation count: 0
+Legal check count: 1160420
+Time: 1.122ms.
+X*O**X*X
+*O**X*X*
+OOXXOX**
+**OOOX*O
+**XOOXX*
+***OOXXX
+******X*
+*******X
+================27==================
+Evaluation count: 0
+Legal check count: 1360894
+Time: 1.201ms.
+X*O**X*X
+*O**XXX*
+OOXXXX**
+**OXOX*O
+**OOOXX*
+**OOOXXX
+******X*
+*******X
+================29==================
+Evaluation count: 0
+Legal check count: 1594796
+Time: 1.292ms.
+X*O**X*X
+*O**XXX*
+OOXXXX**
+**XXOX*O
+**XOXXX*
+**XOOXXX
+**XO**X*
+*******X
+================31==================
+Evaluation count: 0
+Legal check count: 1774083
+Time: 1.390ms.
+X*O**X*X
+*O*OXXX*
+OOXOXX**
+**XOOX*O
+**XOXXX*
+**XOXXXX
+**XX**X*
+**X****X
+================33==================
+Evaluation count: 0
+Legal check count: 1943167
+Time: 1.494ms.
+X*OOXX*X
+*O*OXXX*
+OOXOXX**
+**XOOX*O
+**XOXXX*
+**XOXXXX
+**XX**X*
+**X****X
+================35==================
+Evaluation count: 0
+Legal check count: 2178161
+Time: 1.606ms.
+X*OOXX*X
+*OXXXXX*
+OOXXXX**
+*OOOXX*O
+**OOXXX*
+**XOXXXX
+**XX**X*
+**X****X
+================37==================
+Evaluation count: 0
+Legal check count: 1737258
+Time: 1.694ms.
+XXXXXX*X
+*OXXXXX*
+OOXXXX**
+*OOOXX*O
+**OOXXX*
+**XOOXXX
+**XX*OX*
+**X****X
+================39==================
+Evaluation count: 0
+Legal check count: 1677080
+Time: 1.783ms.
+XXXXXX*X
+*OXXXXX*
+OOXXXX**
+*OOOXX*O
+**OOXXX*
+**XOOXXX
+**XX*OX*
+**X**XOX
+================41==================
+Evaluation count: 0
+Legal check count: 38317
+Time: 1.785ms.
+XXXXXXOX
+*OXXXOX*
+OOXXOX**
+*OOOXX*O
+**OOXXX*
+**XOOXXX
+**XX*XX*
+**X*XXOX
+================43==================
+Evaluation count: 0
+Legal check count: 92295
+Time: 1.793ms.
+XXXXXXOX
+*OXXXOX*
+OOXXOX**
+*OOOOOOO
+**OOXXO*
+**XOXXOX
+**XXXXO*
+**X*XXOX
+================45==================
+Evaluation count: 0
+Legal check count: 166479
+Time: 1.806ms.
+XXXXXXOX
+*OXXXOX*
+OOXXOX*X
+*OOOOOXO
+**OOXXO*
+**XOXOOX
+**XOOXO*
+**XOOOOX
+================47==================
+Evaluation count: 0
+Legal check count: 11065437
+Time: 1.972ms.
+XXXXXXOX
+OOXXXOX*
+OOXXOX*X
+XXOXXXXO
+**OOXXO*
+**XOXOOX
+**XOOXO*
+**XOOOOX
+================49==================
+Evaluation count: 0
+Legal check count: 3009720
+Time: 2.018ms.
+XXXXXXOX
+OOOOOOOO
+OOXXOXOO
+XXOXXOXO
+**OOOXO*
+**XOXOOX
+**XOOXO*
+**XOOOOX
+================51==================
+Evaluation count: 0
+Legal check count: 554987
+Time: 2.027ms.
+XXXXXXOX
+OOOOOOOO
+OOXXOOOO
+XXOXXOOO
+**XOOXOO
+*XXOXOOX
+**XOOXO*
+**XOOOOX
+================53==================
+Evaluation count: 0
+Legal check count: 77193
+Time: 2.029ms.
+XXXXXXOX
+OOOOOOOO
+OOXXOOOO
+XXXXXOOO
+*XXOOXOO
+*XXOXOOO
+**XOOXOO
+**XOOOOX
+================54==================
+Evaluation count: 0
+Legal check count: 15378
+Time: 2.030ms.
+XXXXXXOX
+OOOOOOOO
+OOXOOOOO
+XXOXXOOO
+*OXOOXOO
+OOOOXOOO
+**XOOXOO
+**XOOOOX
+================56==================
+Evaluation count: 0
+Legal check count: 2402
+Time: 2.030ms.
+XXXXXXOX
+OOOOOOOO
+OOXOOOOO
+XXOOXOOO
+XXOOOXOO
+OOOOXOOO
+O*XOOXOO
+**XOOOOX
+================58==================
+Evaluation count: 0
+Legal check count: 401
+Time: 2.030ms.
+XXXXXXOX
+OOOOOOOO
+OOXOOOOO
+XXOOXOOO
+XXOOOXOO
+XOOOXOOO
+XOOOOXOO
+X*XOOOOX
+================60==================
+Evaluation count: 0
+Legal check count: 0
+Time: 2.030ms.
+XXXXXXOX
+OOOOOOOO
+OOXOOOOO
+XXOOXOOO
+XXOOOXOO
+XXOOXOOO
+XXOOOXOO
+XXXOOOOX
+================60==================
+Evaluation count: 0
+Legal check count: 0
+Time: 2.030ms.
+XXXXXXOX
+OOOOOOOO
+OOXOOOOO
+XXOOXOOO
+XXOOOXOO
+XXOOXOOO
+XXOOOXOO
+XXXOOOOX

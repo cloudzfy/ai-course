@@ -6,9 +6,8 @@
 //  Copyright (c) 2014 USC. All rights reserved.
 //
 
+#include <stdio.h>
 #include <iostream>
-#include <ctime>
-#include <sys/timeb.h>
 #include "greedy.h"
 #include "minimax.h"
 #include "alphabeta.h"
@@ -16,22 +15,28 @@
 
 int main(int argc, const char * argv[]) {
     int taskNumber;
+    double cpuTime;
     string player, states;
     FILE *in, *out;
-    double tt;
-    FILE* fp = fopen("time.txt","r");
-    fscanf(fp, "%lf", &tt);
-    fclose(fp);
-    fp = fopen("count.txt","r");
-    fscanf(fp, "%lld", &valCount);
-    fclose(fp);
-    time_t startTime, endTime;
-    startTime = clock();
-    legalCount = 0;
     in = freopen("input.txt", "r", stdin);
     out = freopen("output.txt", "w", stdout);
-    taskNumber = 4;
-    ply = 0;
+    cin>>taskNumber>>player;
+    if (taskNumber < 4)
+    {
+        cin>>depth;
+    }
+    else
+    {
+        cin>>cpuTime;
+    }
+    if(player[0] == 'X')
+    {
+        ply = 1;
+    }
+    else
+    {
+        ply = 0;
+    }
     myPly = ply;
     for (int i = 0; i < 8; i++)
     {
@@ -87,7 +92,7 @@ int main(int argc, const char * argv[]) {
     }
     else if(taskNumber == 4)
     {
-        depthAdjustment();
+        depthAdjustment(cpuTime);
         point* root = new point(-INF, 0, -INF, INF);
         ply = (ply + 1) % 2;
         int ans = competition(root);
@@ -101,29 +106,5 @@ int main(int argc, const char * argv[]) {
     }
     fclose(in);
     fclose(out);
-    endTime = clock();
-    tt += difftime(endTime,startTime)/CLOCKS_PER_SEC;
-    fp = fopen("log.txt","a");
-    fprintf(fp, "================%d==================\n", moveNumber);
-    fprintf(fp, "Evaluation count: %lld\n", valCount);
-    fprintf(fp, "Legal check count: %lld\n", legalCount);
-    fprintf(fp, "Time: %.3fms.\n", tt);
-    for(int i=0;i<8;i++)
-    {
-        for(int j=0;j<8;j++)
-        {
-            if(map[i][j]==XPOS)fprintf(fp, "X");
-            else if(map[i][j]==OPOS)fprintf(fp, "O");
-            else fprintf(fp, "*");
-        }
-        fprintf(fp, "\n");
-    }
-    fclose(fp);
-    fp = fopen("time.txt","w");
-    fprintf(fp, "%.3f\n", tt);
-    fclose(fp);
-    fp = fopen("count.txt","w");
-    fprintf(fp, "%lld\n", valCount);
-    fclose(fp);
     return 0;
 }
