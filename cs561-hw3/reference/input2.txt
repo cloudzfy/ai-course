@@ -1,0 +1,8 @@
+A(x)
+6
+B(B)=>A(A)
+C(C)&D(D)=>A(B)
+C(C)
+B(D)
+A(B)=>B(B)
+B(x)=>D(x)

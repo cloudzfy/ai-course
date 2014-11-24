@@ -1,0 +1,8 @@
+Diagnosis(John,Infected)
+6
+HasSymptom(x,Diarrhea)=>LostWeight(x)
+LostWeight(x)&Diagnosis(x,LikelyInfected)=>Diagnosis(x,Infected)
+HasTraveled(x,Tiberia)&HasFever(x)=>Diagnosis(x,LikelyInfected)
+HasTraveled(John,Tiberia)
+HasFever(John)
+HasSymptom(John,Diarrhea)

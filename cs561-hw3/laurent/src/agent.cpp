@@ -17,9 +17,9 @@ int main(int argc, const char * argv[]) {
     int numOfClauses;
     string sentence, query;
     knowledgeBase kb;
-//    FILE *in, *out;
-//    in = freopen("input.txt","r",stdin);
-//    out = freopen("output.txt","w",stdout);
+   FILE *in, *out;
+   in = freopen("input.txt","r",stdin);
+   out = freopen("output.txt","w",stdout);
     cin>>query;
     scanf("%d",&numOfClauses);
     for(int i=0;i<numOfClauses;i++)

@@ -1,0 +1,6 @@
+B(A,B)
+4
+A(A,x)&A(x,B)=>B(A,B)
+A(A,C)
+A(A,D)
+A(D,B)

@@ -7,7 +7,7 @@
 # Note: Edit refdir below to point to where the reference files are.
 
 use strict;
-my $refdir = "/home/scf-31/youzhenc/cs561-hw2/reference"; # directory where the reference files are
+my $refdir = "/Users/cloudzfy/Documents/workspace/cs561/cs561-hw3/reference"; # directory where the reference files are
 
 # First build:
 my $student = shift;
