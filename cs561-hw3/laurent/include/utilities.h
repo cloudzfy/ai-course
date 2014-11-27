@@ -19,7 +19,6 @@ class theta
 public:
     theta(bool status);
     bool getStatus();
-    void setStatus(bool status);
     bool isExisted(string var);
     string getValue(string var);
     void addSubst(string var, string val);
@@ -51,6 +50,5 @@ public:
 private:
     vector<rule> rules;
 };
-
 
 #endif

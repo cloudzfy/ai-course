@@ -176,9 +176,9 @@ rule standardizeVariables(rule r, theta th)
             for (int i = 0; i < 4; i++)
             {
                 char ch = 'a' + rand() % 26;
-                stream<< ch;
+                stream<<ch;
             }
-            stream>> var;
+            stream>>var;
         }
         it->second = var;
     }
@@ -208,4 +208,3 @@ rule standardizeVariables(rule r, theta th)
     r.setRightHandSide(rhs);
     return r;
 }
-

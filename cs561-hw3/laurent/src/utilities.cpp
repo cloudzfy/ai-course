@@ -14,11 +14,6 @@ theta::theta(bool status)
     this->status = status;
 }
 
-void theta::setStatus(bool status)
-{
-    this->status = status;
-}
-
 bool theta::getStatus()
 {
     return this->status;
