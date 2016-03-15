@@ -1,12 +1,12 @@
 ## Homework #2: Adversarial Search
 
-**Introduction**
+#### Introduction
 
 In this project, you will write a program to determine the next move for a player in the Reversi game using the Greedy, Minimax, and Alpha-Beta pruning algorithms with positional weight evaluation functions.
 
 The rules of the Reversi game can be found at [http://en.wikipedia.org/wiki/Reversi](http://en.wikipedia.org/wiki/Reversi) [1] and interactive examples can be found at [http://www.samsoft.org.uk/reversi/](http://www.samsoft.org.uk/reversi/) [2]. In the Othello version of this game, the game begins with four disks placed in a square in the middle of the grid, two facing light-up, two pieces with the dark side up, with same-colored disks on a diagonal with each other. However, in this assignment, the starting position will be specified in the input file and may be different.
 
-**Tasks**
+#### Tasks
 
 In this assignment, you will write a program to determine the next move by implementing the following algorithms:
 
@@ -16,7 +16,7 @@ In this assignment, you will write a program to determine the next move by imple
 
 In addition, we will have the competition, which is voluntary and for a bonus prize. You will create an agent that can play this game against another agent. The competition is optional and will not affect your grade in the course.
 
-**Legal moves and Flips/Captures**
+#### Legal moves and Flips/Captures
 
 Assume that the current position is as shown in the left image below and that the current turn is Black’s. Black must place a piece with the black side up on the board in such a position that there exists at least one straight (horizontal, vertical, or diagonal) occupied line between the new piece and another black piece, with one or more contiguous light pieces between them. The right image shows all the legal moves available to the Black player (see the translucent circles below that highlight the legal Black moves). If one player cannot make a valid move, play passes back to the other player.
 
@@ -30,11 +30,11 @@ Example of Flips/Captures: In the left image, the available legal White moves ar
 
 ![Example of Flips/Captures](https://raw.githubusercontent.com/cloudzfy/ai-course/master/images/reversi_3.png)
 
-**Pass Move and End Game**
+#### Pass Move and End Game
 
 If one player cannot make a valid move, play **passes** back to the other player. When neither player can move, the game ends. This occurs when the grid has filled up or when neither player can legally place a piece in any of the remaining squares [1].
 
-**Evaluation function: positional weights**
+#### Evaluation function: positional weights
 
 ![Example of Flips/Captures](https://raw.githubusercontent.com/cloudzfy/ai-course/master/images/reversi_4.png)
 
@@ -46,7 +46,7 @@ For example, if the player is black, the board in the picture above has evaluate
 
 Note: The leaf node values are always calculated from this evaluation function. Although this may not be a good estimation for the end game node (and it is a deviation from “official” Reversi rules), you should comply with this rule for simplicity (i.e., you do not need to worry about possible ordering complications between terminal utility values and evaluation values at non- terminal nodes). You can come up with the better evaluation function in the competition task.
 
-**Tie Breaking and Expand order**
+#### Tie Breaking and Expand order
 
 Ties between nodes are broken by selecting the node that is first in positional order on the right figure above. For example, if all legal moves (c4, d3, e6, f5) have the same evaluated values, the program must pick d3 according to the tie breaker rule on the right figure.
 
@@ -54,17 +54,17 @@ Your traverse order must be in the positional order also. For example, your prog
 
 ![Example of Flips/Captures](https://raw.githubusercontent.com/cloudzfy/ai-course/master/images/reversi_5.png)
 
-**Board size**
+#### Board size
 
 The board size is fixed. It has 8 rows and 8 columns. The number of cells is 64.
 
-**Pseudo Codes**
+#### Pseudo Codes
 
 1. **Greedy:** It is a special case of Minimax. The cut-off depth is always 1. Thus, the algorithm is very simple. You only need to pick the action which has the highest evaluation value.
 2. **Minimax:** AIMA Figure 5.3 (Minimax without cut-off) and section 5.4.2 (Explanation of Cutting off search)
 3. **Alpha-Beta:** AIMA Figure 5.3 (Alpha-Beta without cut-off) and section 5.4.2 (Explanation of Cutting off search)
 
-**Compilability**
+#### Compilability
 
 You should take full responsibility to make your code executable. You are required to write Makefile to compile (if necessary) and run your code. In your Makefile, you are required to have 2 targets: agent and run. The agent target is to compile, if needed, otherwise it may do nothing. If “make agent” fails, your grade is 0. The run target is to execute your program. If “make run” fails sometimes, you will get a partial score out of 100. We will run N test cases in total. if "make run" passes and the output is correct on all N cases, then your score is 100. Otherwise, if only G tests pass out of N, then the score is 50 - 50*(N-G)/N (i.e., 50*G/N). Please refer to the example Makefile files below:
 
