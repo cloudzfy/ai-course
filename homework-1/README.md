@@ -11,7 +11,7 @@ There are some constraints when you plan the link:
 1. **Andy** is so shy that he can only be introduced to a person through a mutual friend. For example, if you plan **Andy** to meet **Eason**, **Andy** must be first introduced to **Emma** via **Calvin**, and then let **Emma** introduce **Andy** to **Eason**. This creates a link such as **Andy-Calvin-Emma-Eason**.
 2. **Andy** wants to know **Alice** ASAP. If a mutual close friend introduces **Andy** to someone, he would know this person faster. For example, to reach **Claire**, the time cost of **Andy-Beck-Claire** is **13** but the one of **Andy-David-Claire** is **55**, so **Andy** prefers to know **Claire** by **Beck**.
 
-**Programming Task**
+#### Programming Task
 
 You will need to write a program to implement the following search algorithms, to help Andy find optimal traversal link(s) to reach **Alice**.
 
@@ -25,7 +25,7 @@ Note
 * Your algorithm should perform **loop detection**. As studied in lectures 2-4, do not enqueue a child that has a state already visited, unless the child has a better cost than when we previously visited that state (see slides about “A clean robust algorithm” in session02-04.pptx lecture slides).
 * You can assume that all step costs are positive or zero.
 
-**Compilability**
+#### Compilability
 
 You should take full responsibility to make your code executable. You are required to write Makefile to compile (if necessary) and run your code. In your Makefile, you are required to have 2 targets: agent and run. The agent target is to compile, if needed, otherwise it may do nothing. If “make agent” fails, your grade is 0. The run target is to execute your program. If “make run” fails sometimes, you will get a partial score out of 100. We will run N test cases in total. if "make run" passes and the output is correct on all N cases, then your score is 100. Otherwise, if only G tests pass out of N, then the score is 50 ­ 50*(N­G)/N (i.e., 50*G/N). Please refer to the example Makefile files below:
 
@@ -56,7 +56,7 @@ run:
     ./agent.py
 ```
 
-**Input:**
+#### Input
 
 You are provided with a file `input.txt` that describes the network as exemplified in Fig. 1.
 
@@ -87,7 +87,7 @@ The lines in `<graph>` of the file contains the matrix representation of the gra
 
 The rows and columns correspond to the nodes in the same order. For example, the first row tells us that Andy is not connected to himself (0), connected to Bill with a value 5, and connected to Alice with a value 10. In this assignment, we will assume that all relationships are mutual, so the matrix is symmetric. A weight of 0 indicates that there is no edge between such two people, and any other value describes the distance of their relationship.
 
-**Output:**
+#### Output
 
 The program should output in the format:
 
@@ -108,7 +108,7 @@ Stacy-Emma-Frank-Gerald-Patrick
 
 The nodes (separated by “-”) are in the order that show the link of the friendship. If your program cannot find any solution path in the graph, please output `NoPathAvailable`. The output filename is fixed to `output.txt`. The grader will examine the file `output.txt` for grading.
 
-**Examples:**
+#### Examples
 
 Please make sure your program follows the example here.
 
