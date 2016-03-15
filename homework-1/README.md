@@ -4,6 +4,8 @@
 
 Now Andy needs your help. You know the social network around Andy as Fig. 1, and your job is planning the path for Andy to meet Alice. In Fig. 1, each node is a person, each link is the friendship, and the number of the link means the distance of their relationship. For example, **Andy** feels closer to **Calvin(2)** than **Beck(10)**.
 
+![The social network around Andy](https://raw.githubusercontent.com/cloudzfy/ai-course/master/images/network.png)
+
 There are some constraints when you plan the link:
 
 1. **Andy** is so shy that he can only be introduced to a person through a mutual friend. For example, if you plan **Andy** to meet **Eason**, **Andy** must be first introduced to **Emma** via **Calvin**, and then let **Emma** introduce **Andy** to **Eason**. This creates a link such as **Andy-Calvin-Emma-Eason**.
