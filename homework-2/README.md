@@ -95,7 +95,7 @@ run:
     ./agent.py
 ```
 
-**Input:**
+#### Input
 
 You are provided with a file `input.txt` that describes the current state of the game.
 
@@ -122,7 +122,7 @@ X
 ********
 ```
 
-**Output:**
+#### Output
 
 The program should output the Greedy algorithm in the format:
 
