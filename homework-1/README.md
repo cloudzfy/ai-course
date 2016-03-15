@@ -79,7 +79,7 @@ The lines in `<graph>` of the file contains the matrix representation of the gra
 
 ```
 0 5 10
-502
+5 0 2
 10 2 0
 ```
 
