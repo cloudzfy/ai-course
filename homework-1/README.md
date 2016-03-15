@@ -1,17 +1,17 @@
 ## Homework #1: Uninformed Search
 
-Andy is a graduate student at USC. He is shy and has no idea how to connect to his dream girl, Alice. He saw her at the school orientation, but he couldn’t find the opportunity to approach her. One day Andy reads an article on the Internet: “Six degrees of separation is the assumption that everyone and everything is six or fewer steps away, by way of introduction, from any other person in the world, so that a chain of a-friend-of-a-friend statements can be made to connect any two people in a maximum of six steps.” This assumption strongly encourages Andy. He thinks if he were introduced to the friend of his friend, he eventually would meet his true love, Alice. The question is how to build the link from Andy to Alice.
+**Andy** is a graduate student at USC. He is shy and has no idea how to connect to his dream girl, **Alice**. He saw her at the school orientation, but he couldn’t find the opportunity to approach her. One day **Andy** reads an article on the Internet: “Six degrees of separation is the assumption that everyone and everything is six or fewer steps away, by way of introduction, from any other person in the world, so that a chain of a-friend-of-a-friend statements can be made to connect any two people in a maximum of six steps.” This assumption strongly encourages **Andy**. He thinks if he were introduced to the friend of his friend, he eventually would meet his true love, **Alice**. The question is how to build the link from Andy to Alice.
 
-Now Andy needs your help. You know the social network around Andy as Fig. 1, and your job is planning the path for Andy to meet Alice. In Fig. 1, each node is a person, each link is the friendship, and the number of the link means the distance of their relationship. For example, Andy feels closer to Calvin(2) than Beck(10).
+Now Andy needs your help. You know the social network around Andy as Fig. 1, and your job is planning the path for Andy to meet Alice. In Fig. 1, each node is a person, each link is the friendship, and the number of the link means the distance of their relationship. For example, **Andy** feels closer to **Calvin(2)** than **Beck(10)**.
 
 There are some constraints when you plan the link:
 
-1. Andy is so shy that he can only be introduced to a person through a mutual friend. For example, if you plan Andy to meet Eason, Andy must be first introduced to Emma via Calvin, and then let Emma introduce Andy to Eason. This creates a link such as Andy-Calvin-Emma-Eason.
-2. Andy wants to know Alice ASAP. If a mutual close friend introduces Andy to someone, he would know this person faster. For example, to reach Claire, the time cost of Andy-Beck-Claire is 13 but the one of Andy-David-Claire is 55, so Andy prefers to know Claire by Beck.
+1. **Andy** is so shy that he can only be introduced to a person through a mutual friend. For example, if you plan **Andy** to meet **Eason**, **Andy** must be first introduced to **Emma** via **Calvin**, and then let **Emma** introduce **Andy** to **Eason**. This creates a link such as **Andy-Calvin-Emma-Eason**.
+2. **Andy** wants to know **Alice** ASAP. If a mutual close friend introduces **Andy** to someone, he would know this person faster. For example, to reach **Claire**, the time cost of **Andy-Beck-Claire** is **13** but the one of **Andy-David-Claire** is **55**, so **Andy** prefers to know **Claire** by **Beck**.
 
 **Programming Task**
 
-You will need to write a program to implement the following search algorithms, to help Andy find optimal traversal link(s) to reach Alice.
+You will need to write a program to implement the following search algorithms, to help Andy find optimal traversal link(s) to reach **Alice**.
 
 1. Breadth-first search (30% of test cases)
 2. Depth-first search (30% of test cases)
@@ -19,8 +19,8 @@ You will need to write a program to implement the following search algorithms, t
 
 Note
 
-* When the costs of two or more nodes are equal, you need to make sure these nodes are popped off the search queue in alphabetical order. This will resolve ambiguity and ensure that there is only one correct solution for each problem.
-* Your algorithm should perform loop detection. As studied in lectures 2-4, do not enqueue a child that has a state already visited, unless the child has a better cost than when we previously visited that state (see slides about “A clean robust algorithm” in session02-04.pptx lecture slides).
+* When the costs of two or more nodes are equal, you need to make sure these nodes are **popped off the search queue in alphabetical order**. This will resolve ambiguity and ensure that there is only one correct solution for each problem.
+* Your algorithm should perform **loop detection**. As studied in lectures 2-4, do not enqueue a child that has a state already visited, unless the child has a better cost than when we previously visited that state (see slides about “A clean robust algorithm” in session02-04.pptx lecture slides).
 * You can assume that all step costs are positive or zero.
 
 **Compilability**
@@ -106,5 +106,32 @@ Stacy-Emma-Frank-Gerald-Patrick
 
 The nodes (separated by “-”) are in the order that show the link of the friendship. If your program cannot find any solution path in the graph, please output `NoPathAvailable`. The output filename is fixed to `output.txt`. The grader will examine the file `output.txt` for grading.
 
-||      || Andy || Bob || Claire || David || Alice ||
-|| Andy || 0    || 1   || 1      || 0     || 0     ||
+**Examples:**
+
+Please make sure your program follows the example here.
+
+```
+Nodes: Andy Bob Claire David Alice
+Edges: 5
+Source: Andy
+Destination: Alice
+```
+
+|        | Andy | Bob | Claire | David | Alice |
+|:------:|-----:|----:|-------:|------:|------:|
+| Andy   | 0    | 1   | 1      | 0     | 0     |
+| Bob    | 1    | 0   | 5      | 4     | 0     |
+| Claire | 1    | 5   | 0      | 0     | 1     |
+| David  | 0    | 4   | 0      | 0     | 0     |
+| Alice  | 0    | 0   | 1      | 0     | 0     |
+
+```
+BFS:
+    Log: Andy-Bob-Claire-David-Alice
+    Path: Andy-Claire-Alice
+DFS:
+    Log: Andy-Bob-David-Claire-Alice Path: Andy-Claire-Alice
+Uniform-cost Search:
+    Log: Andy-Bob-Claire-Alice
+    Path: Andy-Claire-Alice
+```
